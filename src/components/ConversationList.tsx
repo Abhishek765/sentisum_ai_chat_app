@@ -13,7 +13,7 @@ import {
 import { Chat as ChatIcon, Add as AddIcon } from "@mui/icons-material";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "../store";
-import { setActiveConversation } from "../store/chatSlice";
+import { setActiveConversation, createConversation } from "../store/chatSlice";
 
 const ConversationList = () => {
   const dispatch = useDispatch();
@@ -25,7 +25,7 @@ const ConversationList = () => {
   );
 
   const handleNewChat = () => {
-    // TODO: dispatcher to create conversation
+    dispatch(createConversation());
   };
 
   return (

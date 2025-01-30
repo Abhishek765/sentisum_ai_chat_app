@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { v4 as uuidv4 } from "uuid";
-import { Conversation, Message } from "../types";
+import { Conversation, Feedback, Message } from "../types";
 
 type ChatState = {
   conversations: Conversation[];
@@ -67,6 +67,23 @@ export const chatSlice = createSlice({
         localStorage.setItem("chatState", JSON.stringify(state));
       }
     },
+    addFeedback: (
+      state,
+      action: PayloadAction<{ conversationId: string; feedback: Feedback }>
+    ) => {
+      const conversation = state.conversations.find(
+        (c) => c.id === action.payload.conversationId
+      );
+      if (conversation) {
+        // Remove existing feedback for the same message if it exists
+        conversation.feedback = conversation.feedback.filter(
+          (f) => f.messageId !== action.payload.feedback.messageId
+        );
+        conversation.feedback.push(action.payload.feedback);
+        // Save to localStorage
+        localStorage.setItem("chatState", JSON.stringify(state));
+      }
+    },
     setActiveConversation: (state, action: PayloadAction<string>) => {
       state.activeConversationId = action.payload;
       // Save to localStorage
@@ -79,6 +96,7 @@ export const {
   createConversation,
   addMessage,
   endConversation,
+  addFeedback,
   setActiveConversation,
 } = chatSlice.actions;
 

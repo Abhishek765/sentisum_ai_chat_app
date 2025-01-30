@@ -1,15 +1,36 @@
 import React from "react";
-import { Paper } from "@mui/material";
-import { Message } from "../types";
+import { Paper, IconButton } from "@mui/material";
+import { ThumbUp, ThumbDown } from "@mui/icons-material";
+import { useDispatch } from "react-redux";
+import { addFeedback } from "../store/chatSlice";
+import { Message, Feedback } from "../types";
 import styles from "../styles/ChatMessage.module.css";
 
 type ChatMessageProps = {
   message: Message;
+  conversationId: string;
+  showFeedback?: boolean;
+  existingFeedback?: Feedback;
 };
 
-const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+const ChatMessage = ({
+  message,
+  conversationId,
+  showFeedback = true,
+  existingFeedback,
+}: ChatMessageProps) => {
+  const dispatch = useDispatch();
+
   const handleFeedback = (liked: boolean) => {
-    // TODO:  add feedback to store
+    dispatch(
+      addFeedback({
+        conversationId,
+        feedback: {
+          messageId: message.id,
+          liked,
+        },
+      })
+    );
   };
 
   const messageStyle = {
@@ -34,6 +55,25 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
       >
         <div style={messageStyle}>{message.content}</div>
       </Paper>
+
+      {message.sender === "ai" && showFeedback && (
+        <div className={styles.feedbackButtons}>
+          <IconButton
+            size="small"
+            onClick={() => handleFeedback(true)}
+            color={existingFeedback?.liked === true ? "success" : "default"}
+          >
+            <ThumbUp fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            onClick={() => handleFeedback(false)}
+            color={existingFeedback?.liked === false ? "error" : "default"}
+          >
+            <ThumbDown fontSize="small" />
+          </IconButton>
+        </div>
+      )}
     </div>
   );
 };
