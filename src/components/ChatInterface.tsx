@@ -7,7 +7,7 @@ import ChatInput from "./ChatInput";
 import { Feedback, Message } from "../types";
 import { addMessage, createConversation } from "../store/chatSlice";
 import { getMockAiResponse } from "../services/mockAiService";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { saveConversation } from "../services/apiService";
 import ConversationFeedback from "./ConversationFeedback";
 import ConversationList from "./ConversationList";
@@ -17,6 +17,7 @@ const ChatInterface = () => {
   const dispatch = useDispatch();
   const [showFeedback, setShowFeedback] = useState<boolean>(false);
   const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const activeConversationId = useSelector(
     (state: RootState) => state.chat.activeConversationId
@@ -27,6 +28,16 @@ const ChatInterface = () => {
   const activeConversation = conversations.find(
     (c) => c.id === activeConversationId
   );
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    if (showFeedback) {
+      scrollToBottom();
+    }
+  }, [showFeedback]);
 
   const handleNewChat = () => {
     dispatch(createConversation());
@@ -103,7 +114,7 @@ const ChatInterface = () => {
               ))}
 
               {showFeedback && (
-                <Box>
+                <Box ref={messagesEndRef}>
                   <ConversationFeedback
                     conversationId={activeConversationId}
                     onComplete={() => setShowFeedback(false)}
