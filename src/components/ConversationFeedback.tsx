@@ -11,7 +11,7 @@ import { useDispatch } from "react-redux";
 import { addFeedback, endConversation } from "../store/chatSlice";
 
 type ConversationFeedbackProps = {
-  conversationId: string | null;
+  conversationId: string;
   onComplete: () => void;
 };
 

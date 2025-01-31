@@ -1,4 +1,3 @@
-import React from "react";
 import { Paper, IconButton } from "@mui/material";
 import { ThumbUp, ThumbDown } from "@mui/icons-material";
 import { useDispatch } from "react-redux";
