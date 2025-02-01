@@ -5,7 +5,11 @@ import { useDispatch, useSelector } from "react-redux";
 import ChatMessage from "./ChatMessage";
 import ChatInput from "./ChatInput";
 import { Feedback, Message } from "../types";
-import { addMessage, createConversation } from "../store/chatSlice";
+import {
+  addMessage,
+  createConversation,
+  showConversationFeedbackForm,
+} from "../store/chatSlice";
 import { getMockAiResponse } from "../services/mockAiService";
 import { useEffect, useRef, useState } from "react";
 import { saveConversation } from "../services/apiService";
@@ -15,7 +19,6 @@ import ShareDialog from "./ShareDialog";
 
 const ChatInterface = () => {
   const dispatch = useDispatch();
-  const [showFeedback, setShowFeedback] = useState<boolean>(false);
   const [showShareDialog, setShowShareDialog] = useState<boolean>(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -34,10 +37,10 @@ const ChatInterface = () => {
   };
 
   useEffect(() => {
-    if (showFeedback) {
+    if (activeConversation?.showConversationFeedbackForm) {
       scrollToBottom();
     }
-  }, [showFeedback]);
+  }, [activeConversation?.showConversationFeedbackForm]);
 
   const handleNewChat = () => {
     dispatch(createConversation());
@@ -76,7 +79,12 @@ const ChatInterface = () => {
   };
 
   const handleEndConversation = async () => {
-    setShowFeedback(true);
+    dispatch(
+      showConversationFeedbackForm({
+        activeConversationId,
+        shouldShowConversationFeedbackForm: true,
+      })
+    );
     if (activeConversation) {
       try {
         await saveConversation(activeConversation);
@@ -109,15 +117,25 @@ const ChatInterface = () => {
                   existingFeedback={activeConversation.feedback.find(
                     (f) => f.messageId === message.id
                   )}
-                  showFeedback={!activeConversation.ended}
+                  showFeedback={
+                    !activeConversation?.showConversationFeedbackForm &&
+                    !activeConversation.ended
+                  }
                 />
               ))}
 
-              {showFeedback && (
+              {activeConversation.showConversationFeedbackForm && (
                 <Box ref={messagesEndRef}>
                   <ConversationFeedback
                     conversationId={activeConversationId}
-                    onComplete={() => setShowFeedback(false)}
+                    onComplete={() =>
+                      dispatch(
+                        showConversationFeedbackForm({
+                          activeConversationId,
+                          shouldShowConversationFeedbackForm: false,
+                        })
+                      )
+                    }
                   />
                 </Box>
               )}
@@ -182,27 +200,28 @@ const ChatInterface = () => {
               )}
             </Box>
 
-            {!activeConversation.ended && (
-              <Box>
-                <ChatInput onSend={handleNewMessage} />
-                <Box
-                  sx={{
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    mt: 1,
-                    gap: 1,
-                  }}
-                >
-                  <Button
-                    variant="text"
-                    size="small"
-                    onClick={handleEndConversation}
+            {!activeConversation.showConversationFeedbackForm &&
+              !activeConversation.ended && (
+                <Box>
+                  <ChatInput onSend={handleNewMessage} />
+                  <Box
+                    sx={{
+                      display: "flex",
+                      justifyContent: "flex-end",
+                      mt: 1,
+                      gap: 1,
+                    }}
                   >
-                    End & Rate Conversation
-                  </Button>
+                    <Button
+                      variant="text"
+                      size="small"
+                      onClick={handleEndConversation}
+                    >
+                      End & Rate Conversation
+                    </Button>
+                  </Box>
                 </Box>
-              </Box>
-            )}
+              )}
 
             <ShareDialog
               open={showShareDialog}

@@ -12,7 +12,7 @@ export const getMockAiResponse = async (
   userMessage: string
 ): Promise<Message> => {
   // maybe we can userMessage to send this to our logger/analytics
-  // Simulate API delay
+  // To Simulate API delay
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   return {

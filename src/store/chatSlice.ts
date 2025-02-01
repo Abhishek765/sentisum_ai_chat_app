@@ -37,11 +37,11 @@ export const chatSlice = createSlice({
         id: uuidv4(),
         messages: [],
         feedback: [],
+        showConversationFeedbackForm: false,
         ended: false,
       };
       state.conversations.push(newConversation);
       state.activeConversationId = newConversation.id;
-      // Save to localStorage
       localStorage.setItem("chatState", JSON.stringify(state));
     },
     addMessage: (
@@ -53,7 +53,22 @@ export const chatSlice = createSlice({
       );
       if (conversation) {
         conversation.messages.push(action.payload.message);
-        // Save to localStorage
+        localStorage.setItem("chatState", JSON.stringify(state));
+      }
+    },
+    showConversationFeedbackForm: (
+      state,
+      action: PayloadAction<{
+        activeConversationId: string | null;
+        shouldShowConversationFeedbackForm?: boolean;
+      }>
+    ) => {
+      const conversation = state.conversations.find(
+        (c) => c.id === action.payload.activeConversationId
+      );
+      if (conversation) {
+        conversation.showConversationFeedbackForm =
+          action.payload.shouldShowConversationFeedbackForm ?? false;
         localStorage.setItem("chatState", JSON.stringify(state));
       }
     },
@@ -62,8 +77,8 @@ export const chatSlice = createSlice({
         (c) => c.id === action.payload
       );
       if (conversation) {
+        conversation.showConversationFeedbackForm = true;
         conversation.ended = true;
-        // Save to localStorage
         localStorage.setItem("chatState", JSON.stringify(state));
       }
     },
@@ -80,13 +95,11 @@ export const chatSlice = createSlice({
           (f) => f.messageId !== action.payload.feedback.messageId
         );
         conversation.feedback.push(action.payload.feedback);
-        // Save to localStorage
         localStorage.setItem("chatState", JSON.stringify(state));
       }
     },
     setActiveConversation: (state, action: PayloadAction<string>) => {
       state.activeConversationId = action.payload;
-      // Save to localStorage
       localStorage.setItem("chatState", JSON.stringify(state));
     },
   },
@@ -95,6 +108,7 @@ export const chatSlice = createSlice({
 export const {
   createConversation,
   addMessage,
+  showConversationFeedbackForm,
   endConversation,
   addFeedback,
   setActiveConversation,

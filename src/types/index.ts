@@ -20,5 +20,6 @@ export type Conversation = {
   id: string;
   messages: Message[];
   feedback: Feedback[];
+  showConversationFeedbackForm: boolean;
   ended: boolean;
 };
